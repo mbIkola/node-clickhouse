@@ -173,7 +173,15 @@ function httpRequest (reqParams, reqData, cb) {
 	});
 
 	var req = http.request (reqParams, httpResponseHandler.bind (this, stream, reqParams, reqData, cb));
-
+    req.on('error', (e) => {
+        let err = parseError(e);
+        if ( stream.listeners('error').length ) {
+            // do not emit error if there are no listeners for it
+            // otherwise node will hang process due to uncaugh error
+            stream.emit('error', err);
+        }
+        return cb && cb(err);
+    });
 	stream.req = req;
 
 	if (reqData.query)

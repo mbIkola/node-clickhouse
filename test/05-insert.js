@@ -35,11 +35,12 @@ describe ("insert data", function () {
 	var server,
 		host = process.env.CLICKHOUSE_HOST || '127.0.0.1',
 		port = process.env.CLICKHOUSE_PORT || 8123,
+        auth = process.env.CLICKHOUSE_AUTH || 'default:',
 		dbCreated = false,
 		dbName = 'node_clickhouse_test_insert';
 
 	before (function () {
-		var ch = new ClickHouse ({host: host, port: port});
+		var ch = new ClickHouse ({host: host, port: port, auth: auth});
 		var okFn = function () {return Promise.resolve()};
 		return ch.querying ("DROP DATABASE " + dbName).then (
 			okFn, okFn
