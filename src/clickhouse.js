@@ -1,7 +1,8 @@
-var http = require ('http');
-var url  = require ('url');
-var qs   = require ('querystring');
-var util = require ('util');
+const http = require ('http');
+const https = require('https');
+const url  = require ('url');
+const qs   = require ('querystring');
+const util = require ('util');
 
 // var debug = require ('debug')('clickhouse');
 
@@ -172,7 +173,7 @@ function httpRequest (reqParams, reqData, cb) {
 		format: reqData.format
 	});
 
-	var req = http.request (reqParams, httpResponseHandler.bind (this, stream, reqParams, reqData, cb));
+	var req = (reqParams.secure ? https : http).request (reqParams, httpResponseHandler.bind (this, stream, reqParams, reqData, cb));
     req.on('error', (e) => {
         let err = parseError(e);
         if ( stream.listeners('error').length ) {

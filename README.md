@@ -98,6 +98,8 @@ for [http.request](https://nodejs.org/api/http.html#http_http_request_options_ca
 
  * **auth**:     authentication as `user:password`, optional
  * **host**:     host to connect, can contain port name
+ * **port**:     port to connect to.
+ * **secure**:   use https instead of http. false by default
  * **pathname**: pathname of ClickHouse server or `/` if omited,
 
 `queryOptions` object can contain any option from Settings (docs:
