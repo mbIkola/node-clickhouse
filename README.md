@@ -52,12 +52,12 @@ stream.on ('end', function () {
 // insert from file
 
 var tsvStream = fs.createReadStream ('data.tsv');
-var clickhouseStream = clickHouse.query (statement, {inputFormat: 'TSV'});
+var clickhouseStream = clickHouse.query (statement, {format: 'TSV'});
 
 tsvStream.pipe (clickhouseStream);
 
 // insert row data
-var clickhouseStream = clickHouse.query (statement, {inputFormat: 'TSV'}, function (err) {
+var clickhouseStream = clickHouse.query (statement, {format: 'TSV'}, function (err) {
 
   console.log ('Insert complete!');
 
@@ -174,13 +174,13 @@ Notes
 with javascript: CSV and TabSeparated/TSV.
 
 CSV is useful for loading from file, thus you can read and pipe into clickhouse
-file contents. To activate CSV parsing you should set `inputFormat` option to `CSV`
+file contents. To activate CSV parsing you should set `format` option to `CSV`
 for driver or query (BEWARE: not works as expected, use TSV):
 
 ```javascript
 
 var csvStream = fs.createReadStream ('data.csv');
-var clickhouseStream = clickHouse.query (statement, {inputFormat: CSV});
+var clickhouseStream = clickHouse.query (statement, {format: CSV});
 
 csvStream.pipe (clickhouseStream);
 
