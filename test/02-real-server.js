@@ -11,10 +11,12 @@ describe ("real server", function () {
 	var server,
 		host = process.env.CLICKHOUSE_HOST || '127.0.0.1',
 		port = process.env.CLICKHOUSE_PORT || 8123,
+		auth = process.env.CLICKHOUSE_AUTH || 'default:',
 		dbCreated = false;
+	const connectOpts = {host: host, port: port, auth: auth};
 
 	it ("pings", function (done) {
-		var ch = new ClickHouse ({host: host, port: port});
+		var ch = new ClickHouse (connectOpts);
 		ch.ping (function (err, ok) {
 			assert.ifError (err);
 			assert.equal (ok, "Ok.\n", "ping response should be 'Ok.\\n'");
@@ -23,17 +25,21 @@ describe ("real server", function () {
 	});
 
 	it ("pinging using promise interface", function () {
-		var ch = new ClickHouse ({host: host, port: port});
+		var ch = new ClickHouse (connectOpts);
 		return ch.pinging ();
 	});
 
 	it ("pinging using promise interface with bad connection option", function () {
-		var ch = new ClickHouse ();
-		return ch.pinging ().then (function () {
-			return Promise.reject (new Error ("Driver should throw without host name"))
-		}, function (e) {
-			return Promise.resolve ();
-		});
+		try {
+            var ch = new ClickHouse();
+            return ch.pinging().then(function () {
+                return Promise.reject(new Error("Driver should throw without host name"))
+            }, function (e) {
+                return Promise.resolve();
+            });
+        } catch ( e ) {
+			return Promise.resolve();
+		}
 	});
 
 	it ("pings with options as host", function (done) {
@@ -45,13 +51,10 @@ describe ("real server", function () {
 		});
 	});
 
-	it ("nothing to ping", function () {
-		var ch = new ClickHouse ();
-		assert (ch);
-	});
+
 
 	it ("returns error", function (done) {
-		var ch = new ClickHouse ({host: host, port: port, useQueryString: true});
+		var ch = new ClickHouse (Object.assign({}, connectOpts, { useQueryString: true}));
 		var stream = ch.query ("ABCDEFGHIJKLMN", {syncParser: true}, function (err, result) {
 			// assert (err);
 			// done ();
@@ -65,7 +68,7 @@ describe ("real server", function () {
 	});
 
 	it ("selects from system columns", function (done) {
-		var ch = new ClickHouse ({host: host, port: port});
+		var ch = new ClickHouse (connectOpts);
 		ch.query ("SELECT * FROM system.columns", function (err, result) {
 			assert (!err);
 
@@ -74,7 +77,7 @@ describe ("real server", function () {
 	});
 
 	it ("selects from system columns no more than 10 rows throws exception", function (done) {
-		var ch = new ClickHouse ({host: host, port: port, queryOptions: {max_rows_to_read: 10}});
+		var ch = new ClickHouse (Object.assign( {}, connectOpts, { queryOptions: {max_rows_to_read: 10}}));
 		ch.query ("SELECT * FROM system.columns", function (err, result) {
 			assert (err);
 
@@ -83,7 +86,7 @@ describe ("real server", function () {
 	});
 
 	it ("creates a database", function (done) {
-		var ch = new ClickHouse ({host: host, port: port});
+		var ch = new ClickHouse (connectOpts);
 		ch.query ("CREATE DATABASE node_clickhouse_test", function (err, result) {
 			assert (!err, err);
 
@@ -95,7 +98,7 @@ describe ("real server", function () {
 	});
 
 	it ("creates a table", function (done) {
-		var ch = new ClickHouse ({host: host, port: port});
+		var ch = new ClickHouse (connectOpts);
 		ch.query ("CREATE TABLE node_clickhouse_test.t (a UInt8) ENGINE = Memory", function (err, result) {
 			assert (!err, err);
 
@@ -104,7 +107,7 @@ describe ("real server", function () {
 	});
 
 	it ("drops a table", function (done) {
-		var ch = new ClickHouse ({host: host, port: port, queryOptions: {database: 'node_clickhouse_test'}});
+		var ch = new ClickHouse ( Object.assign({}, connectOpts, {queryOptions: {database: 'node_clickhouse_test'}}));
 		ch.query ("DROP TABLE t", function (err, result) {
 			assert (!err);
 
@@ -113,7 +116,7 @@ describe ("real server", function () {
 	});
 
 	it ("creates a table", function (done) {
-		var ch = new ClickHouse ({host: host, port: port, queryOptions: {database: 'node_clickhouse_test'}});
+		var ch = new ClickHouse ( Object.assign({}, connectOpts, {queryOptions: {database: 'node_clickhouse_test'}}));
 		ch.query ("CREATE TABLE t (a UInt8) ENGINE = Memory", function (err, result) {
 			assert (!err);
 
@@ -122,7 +125,7 @@ describe ("real server", function () {
 	});
 
 	it ("inserts some data", function (done) {
-		var ch = new ClickHouse ({host: host, port: port});
+		var ch = new ClickHouse (connectOpts);
 		ch.query ("INSERT INTO t VALUES (1),(2),(3)", {queryOptions: {database: 'node_clickhouse_test'}}, function (err, result) {
 			assert (!err, err);
 
@@ -132,7 +135,7 @@ describe ("real server", function () {
 	});
 
 	it ("gets back data", function (done) {
-		var ch = new ClickHouse ({host: host, port: port});
+		var ch = new ClickHouse (connectOpts);
 		var rows = [];
 		var stream = ch.query ("select a FROM t", {queryOptions: {database: 'node_clickhouse_test'}});
 
@@ -152,7 +155,7 @@ describe ("real server", function () {
 		if (!dbCreated)
 			return done ();
 
-		var ch = new ClickHouse ({host: host, port: port});
+		var ch = new ClickHouse (connectOpts);
 		ch.query ("DROP DATABASE node_clickhouse_test", function (err, result) {
 			assert (!err);
 

@@ -54,7 +54,7 @@ describe ("insert data", function () {
 	});
 
 	it ("creates a table", function (done) {
-		var ch = new ClickHouse ({host: host, port: port, queryOptions: {database: dbName}});
+		var ch = new ClickHouse ({host: host, port: port, auth: auth, queryOptions: {database: dbName}});
 		ch.query ("CREATE TABLE t (a UInt8) ENGINE = Memory", function (err, result) {
 			assert (!err);
 
@@ -63,7 +63,7 @@ describe ("insert data", function () {
 	});
 
 	it ("inserts some prepared data using stream", function (done) {
-		var ch = new ClickHouse ({host: host, port: port});
+		var ch = new ClickHouse ({host: host, port: port, auth: auth});
 		var stream = ch.query ("INSERT INTO t", {queryOptions: {database: dbName}}, function (err, result) {
 			assert (!err, err);
 
@@ -85,7 +85,7 @@ describe ("insert data", function () {
 	});
 
 	it ("inserts some data", function (done) {
-		var ch = new ClickHouse ({host: host, port: port});
+		var ch = new ClickHouse ({host: host, port: port, auth: auth});
 		ch.query ("INSERT INTO t VALUES (1),(2),(3)", {queryOptions: {database: dbName}}, function (err, result) {
 			assert (!err, err);
 
@@ -94,7 +94,7 @@ describe ("insert data", function () {
 	});
 
 	it ("creates a table 2", function (done) {
-		var ch = new ClickHouse ({host: host, port: port, queryOptions: {database: dbName}});
+		var ch = new ClickHouse ({host: host, port: port, auth: auth, queryOptions: {database: dbName}});
 		ch.query ("CREATE TABLE t2 (a UInt8, b Float32, x Nullable(String), z DateTime) ENGINE = Memory", function (err, result) {
 			assert (!err);
 
@@ -103,7 +103,7 @@ describe ("insert data", function () {
 	});
 
 	it ("inserts data from array using stream", function (done) {
-		var ch = new ClickHouse ({host: host, port: port});
+		var ch = new ClickHouse ({host: host, port: port, auth: auth});
 
 		var now = new Date ();
 
@@ -137,7 +137,7 @@ describe ("insert data", function () {
 	});
 
 	it ("creates a table 3", function (done) {
-		var ch = new ClickHouse ({host: host, port: port, queryOptions: {database: dbName}});
+		var ch = new ClickHouse ({host: host, port: port, auth: auth, queryOptions: {database: dbName}});
 		ch.query ("CREATE TABLE t3 (a UInt8, b Float32, x Nullable(String), z DateTime) ENGINE = Memory", function (err, result) {
 			assert (!err);
 
@@ -146,7 +146,7 @@ describe ("insert data", function () {
 	});
 
 	it ("inserts data from array of objects using stream", function (done) {
-		var ch = new ClickHouse ({host: host, port: port});
+		var ch = new ClickHouse ({host: host, port: port, auth: auth});
 
 		var now = new Date ();
 
@@ -183,7 +183,7 @@ describe ("insert data", function () {
 
 		this.timeout (5000);
 
-		var ch = new ClickHouse ({host: host, port: port});
+		var ch = new ClickHouse ({host: host, port: port, auth: auth});
 
 		var now = new Date ();
 		var csvFileName = __filename.replace ('.js', '.csv');
@@ -226,7 +226,7 @@ describe ("insert data", function () {
 
 		this.timeout (5000);
 
-		var ch = new ClickHouse ({host: host, port: port});
+		var ch = new ClickHouse ({host: host, port: port, auth: auth});
 
 		var now = new Date ();
 		var tsvFileName = __filename.replace ('.js', '.tsv');
@@ -269,7 +269,7 @@ describe ("insert data", function () {
 		if (!dbCreated)
 			return done;
 
-		var ch = new ClickHouse ({host: host, port: port});
+		var ch = new ClickHouse ({host: host, port: port, auth: auth});
 		ch.query ("DROP DATABASE " + dbName, function (err, result) {
 			assert (!err);
 

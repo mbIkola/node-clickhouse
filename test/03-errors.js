@@ -11,10 +11,13 @@ describe ("error parsing", function () {
 	var server,
 		host = process.env.CLICKHOUSE_HOST || '127.0.0.1',
 		port = process.env.CLICKHOUSE_PORT || 8123,
+		auth = process.env.CLICKHOUSE_AUTH || 'default:',
 		dbCreated = false;
+    const connectOpts = {host: host, port: port, auth: auth, useQueryString: true};
 
-	it ("returns error for unknown sql", function (done) {
-		var ch = new ClickHouse ({host: host, port: port, useQueryString: true});
+
+    it ("returns error for unknown sql", function (done) {
+		var ch = new ClickHouse (connectOpts);
 		var stream = ch.query ("ABCDEFGHIJKLMN", {syncParser: true}, function (err, result) {
 			// assert (err);
 			// done ();
@@ -32,7 +35,7 @@ describe ("error parsing", function () {
 	});
 
 	it ("returns error with line/col for sql with garbage", function (done) {
-		var ch = new ClickHouse ({host: host, port: port, useQueryString: true});
+		var ch = new ClickHouse (connectOpts);
 		var stream = ch.query ("CREATE\n\t\tABCDEFGHIJKLMN", {syncParser: true}, function (err, result) {
 			// assert (err);
 			// done ();
@@ -50,9 +53,10 @@ describe ("error parsing", function () {
 	});
 
 	it ("returns error for empty sql", function (done) {
-		var ch = new ClickHouse ({host: host, port: port, useQueryString: true});
+		var ch = new ClickHouse (connectOpts);
 
 		function countCallbacks (err) {
+
 			countCallbacks.count = (countCallbacks.count || 0) + 1;
 
 			if (countCallbacks.count === 2) {
@@ -63,16 +67,12 @@ describe ("error parsing", function () {
 
 		var stream = ch.query ("-- nothing here", {syncParser: true}, function (err, result) {
 			countCallbacks (err);
-			// assert (err);
-			// done ();
 		});
 
 		stream.on ('error', function (err) {
 
-			// console.log (err); // failed at end of query
-
 			assert (err);
-			assert (err.message.match (/Syntax error/));
+			assert (err.message.match (/Empty query/i));
 			assert.ifError ('lineno' in err);
 			assert.ifError ('colno'  in err);
 
@@ -81,7 +81,7 @@ describe ("error parsing", function () {
 	});
 
 	it ("returns error for unknown table", function (done) {
-		var ch = new ClickHouse ({host: host, port: port, useQueryString: true});
+		var ch = new ClickHouse (connectOpts);
 		var stream = ch.query ("SELECT * FROM xxx", {syncParser: true}, function (err, result) {
 			// assert (err);
 			// done ();

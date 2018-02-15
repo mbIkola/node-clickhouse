@@ -27,7 +27,7 @@ function httpResponseHandler (stream, reqParams, reqData, cb, response) {
 		var err = parseError (e);
 
 		// user should define callback or add event listener for the error event
-		if (!cb || (cb && stream.listeners ('error').length))
+		if (!cb || ( stream.listeners ('error').length))
 			stream.emit ('error', err);
 		return cb && cb (err);
 	}
@@ -201,7 +201,8 @@ function ClickHouse (options) {
 	}
 
 	if (!options) {
-		throw new Error('You must provide at least host name to query ClickHouse');
+        debug('Error: no host name provided in constructor');
+		throw new Error("It's not allowed to create instance without host ");
 	}
 
 	if (options.constructor === String) {
@@ -209,7 +210,7 @@ function ClickHouse (options) {
 	}
 
 	options.queryOptions = options.queryOptions || {};
-	
+
 	this.options = options;
 }
 
@@ -250,7 +251,9 @@ ClickHouse.prototype.query = function (chQuery, options, cb) {
 	options.dataObjects = options.dataObjects || this.options.dataObjects || false;
 	options.format      = options.format      || this.options.format      || null;
 
-	options.queryOptions.database = options.queryOptions.database || this.options.queryOptions.database;
+	if ( this.options.queryOptions.database ) {
+        options.queryOptions.database = options.queryOptions.database || this.options.queryOptions.database;
+    }
 
 	// we're adding `queryOptions` passed for constructor if any
 	var queryObject = Object.assign ({}, this.options.queryOptions, options.queryOptions);

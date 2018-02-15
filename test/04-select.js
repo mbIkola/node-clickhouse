@@ -7,10 +7,12 @@ describe ("select data from database", function () {
 	var server,
 		host = process.env.CLICKHOUSE_HOST || '127.0.0.1',
 		port = process.env.CLICKHOUSE_PORT || 8123,
+        auth = process.env.CLICKHOUSE_AUTH || 'default:',
 		dbCreated = false;
+    const connectOpts = {host: host, port: port, auth: auth, useQueryString: true};
 
 	it ("selects using callback", function (done) {
-		var ch = new ClickHouse ({host: host, port: port, useQueryString: true});
+		var ch = new ClickHouse (connectOpts);
 		ch.query ("SELECT 1", {syncParser: true}, function (err, result) {
 			assert (!err);
 			assert (result.meta, "result should be Object with `data` key to represent rows");
@@ -20,7 +22,7 @@ describe ("select data from database", function () {
 	});
 
 	it ("selects using callback and query submitted in the POST body", function (done) {
-		var ch = new ClickHouse ({host: host, port: port});
+		var ch = new ClickHouse ({host: host, port: port, auth: auth});
 		ch.query ("SELECT 1", {syncParser: true}, function (err, result) {
 			assert (!err);
 			assert (result.meta, "result should be Object with `data` key to represent rows");
@@ -30,7 +32,7 @@ describe ("select data from database", function () {
 	});
 
 	it ("selects numbers using callback", function (done) {
-		var ch = new ClickHouse ({host: host, port: port, useQueryString: true});
+		var ch = new ClickHouse (connectOpts);
 		ch.query ("SELECT number FROM system.numbers LIMIT 10", {syncParser: true}, function (err, result) {
 			assert (!err);
 			assert (result.meta, "result should be Object with `data` key to represent rows");
@@ -47,7 +49,7 @@ describe ("select data from database", function () {
 	});
 
 	it ("selects numbers using promise", function () {
-		var ch = new ClickHouse ({host: host, port: port, useQueryString: true});
+		var ch = new ClickHouse (connectOpts);
 		return ch.querying ("SELECT number FROM system.numbers LIMIT 10", {syncParser: true}).then (function (result) {
 			assert (result.meta, "result should be Object with `data` key to represent rows");
 			assert (result.data, "result should be Object with `meta` key to represent column info");
@@ -63,7 +65,7 @@ describe ("select data from database", function () {
 	});
 
 	it ("selects numbers using callback and query submitted in the POST body", function (done) {
-		var ch = new ClickHouse ({host: host, port: port});
+		var ch = new ClickHouse ({host: host, port: port, auth:auth});
 		ch.query ("SELECT number FROM system.numbers LIMIT 10", {syncParser: true}, function (err, result) {
 			assert (!err);
 			assert (result.meta, "result should be Object with `meta` key to represent rows");
@@ -81,7 +83,7 @@ describe ("select data from database", function () {
 	});
 
 	it ("selects numbers asynchronously using events and query submitted in the POST body", function (done) {
-		var ch = new ClickHouse ({host: host, port: port});
+		var ch = new ClickHouse ({host: host, port: port, auth:auth});
 		var rows = [];
 		var stream = ch.query ("SELECT number FROM system.numbers LIMIT 10", function (err, result) {
 			assert (!err);
@@ -103,7 +105,7 @@ describe ("select data from database", function () {
 	});
 
 	it ("selects numbers asynchronously using stream and query submitted in the POST body", function (done) {
-		var ch = new ClickHouse ({host: host, port: port});
+		var ch = new ClickHouse ({host: host, port: port, auth: auth});
 		var metadata;
 		var rows = [];
 		var stream = ch.query ("SELECT number FROM system.numbers LIMIT 10");
@@ -133,7 +135,7 @@ describe ("select data from database", function () {
 	});
 
 	it ("selects number objects asynchronously using stream and query submitted in the POST body", function (done) {
-		var ch = new ClickHouse ({host: host, port: port});
+		var ch = new ClickHouse ({host: host, port: port, auth: auth});
 		var metadata;
 		var rows = [];
 		var stream = ch.query ("SELECT number FROM system.numbers LIMIT 10", {dataObjects: true});
@@ -164,7 +166,7 @@ describe ("select data from database", function () {
 
 	it ("select data in unsupported format", function (done) {
 
-		var ch = new ClickHouse ({host: host, port: port});
+		var ch = new ClickHouse ({host: host, port: port, auth: auth});
 
 		ch.query ("SELECT number FROM system.numbers LIMIT 10", {format: "CSV"}, function (err, result) {
 
