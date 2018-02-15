@@ -4,7 +4,7 @@ const url  = require ('url');
 const qs   = require ('querystring');
 const util = require ('util');
 
-// var debug = require ('debug')('clickhouse');
+var debug = require ('debug')('clickhouse');
 
 require ('./legacy-support');
 
@@ -89,7 +89,7 @@ function httpResponseHandler (stream, reqParams, reqData, cb, response) {
 	//the whole response has been received, so we just print it out here
 	response.on('end', function () {
 
-		// debug (response.headers);
+		debug (response.headers);
 
 		if (error) {
 			return errorHandler (error);
@@ -196,15 +196,20 @@ function httpRequest (reqParams, reqData, cb) {
 }
 
 function ClickHouse (options) {
+	if ( (! this instanceof ClickHouse ) ) {
+		return new ClickHouse(options);
+	}
+
 	if (!options) {
-		console.error ('You must provide at least host name to query ClickHouse');
-		return null;
+		throw new Error('You must provide at least host name to query ClickHouse');
 	}
 
 	if (options.constructor === String) {
 		options = {host: options};
 	}
 
+	options.queryOptions = options.queryOptions || {};
+	
 	this.options = options;
 }
 
@@ -235,14 +240,17 @@ ClickHouse.prototype.query = function (chQuery, options, cb) {
 		options = undefined;
 	}
 
-	if (!options)
+	if (!options) {
 		options = {
 			queryOptions: {}
 		};
+	}
 
 	options.omitFormat  = options.omitFormat  || this.options.omitFormat  || false;
 	options.dataObjects = options.dataObjects || this.options.dataObjects || false;
 	options.format      = options.format      || this.options.format      || null;
+
+	options.queryOptions.database = options.queryOptions.database || this.options.queryOptions.database;
 
 	// we're adding `queryOptions` passed for constructor if any
 	var queryObject = Object.assign ({}, this.options.queryOptions, options.queryOptions);
